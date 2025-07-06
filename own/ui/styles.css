@@ -1,0 +1,477 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 30px;
+    font-size: 2.5em;
+}
+
+h2 {
+    color: #34495e;
+    margin-bottom: 20px;
+}
+
+h3 {
+    color: #7f8c8d;
+    margin-bottom: 10px;
+}
+
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #ddd;
+}
+
+.tab-button {
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: #666;
+    transition: all 0.3s;
+    border-bottom: 3px solid transparent;
+}
+
+.tab-button:hover {
+    color: #333;
+}
+
+.tab-button.active {
+    color: #3498db;
+    border-bottom-color: #3498db;
+}
+
+.tab-content {
+    display: none;
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.input-section {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+}
+
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    resize: vertical;
+    font-family: 'Monaco', 'Consolas', monospace;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+}
+
+.quick-tests {
+    margin: 15px 0;
+}
+
+.model-selection {
+    margin: 15px 0;
+}
+
+.controls {
+    margin: 20px 0;
+    display: flex;
+    gap: 10px;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.primary-btn {
+    background: #3498db;
+    color: white;
+}
+
+.primary-btn:hover {
+    background: #2980b9;
+}
+
+.secondary-btn {
+    background: #95a5a6;
+    color: white;
+}
+
+.secondary-btn:hover {
+    background: #7f8c8d;
+}
+
+.output-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+audio {
+    width: 100%;
+    margin: 10px 0;
+}
+
+pre {
+    background: #2c3e50;
+    color: #ecf0f1;
+    padding: 15px;
+    border-radius: 4px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.4;
+    margin-top: 10px;
+}
+
+.transcript {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+    min-height: 100px;
+    margin: 10px 0;
+    font-family: 'Georgia', serif;
+    line-height: 1.8;
+}
+
+.info-panel {
+    background: #ecf0f1;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.info-panel ul {
+    list-style: none;
+    padding-left: 20px;
+}
+
+.info-panel li:before {
+    content: "✓ ";
+    color: #27ae60;
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.error {
+    color: #e74c3c;
+    background: #ffe6e6;
+    padding: 10px;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+.success {
+    color: #27ae60;
+    background: #d4edda;
+    padding: 10px;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+.message {
+    padding: 10px;
+    border-radius: 4px;
+    margin: 10px 0;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Audio source tabs */
+.audio-source-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.source-tab {
+    padding: 8px 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+    font-size: 14px;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s;
+}
+
+.source-tab:hover {
+    color: #333;
+}
+
+.source-tab.active {
+    color: #3498db;
+    border-bottom-color: #3498db;
+}
+
+.audio-source {
+    display: none;
+    margin-bottom: 20px;
+}
+
+.audio-source.active {
+    display: block;
+}
+
+/* Recording interface */
+.recording-controls {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.record-button {
+    padding: 15px 30px;
+    font-size: 16px;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.record-button:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+}
+
+.record-button.recording {
+    background: #27ae60;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.4); }
+    70% { box-shadow: 0 0 0 15px rgba(39, 174, 96, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0); }
+}
+
+.recording-status {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #666;
+}
+
+.timer {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #e74c3c;
+    margin: 10px 0;
+    font-family: 'Monaco', 'Consolas', monospace;
+}
+
+/* Upload interface */
+.upload-area {
+    margin: 20px 0;
+}
+
+.upload-zone {
+    border: 2px dashed #3498db;
+    border-radius: 8px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: #f8f9fa;
+}
+
+.upload-zone:hover {
+    background: #e3f2fd;
+    border-color: #2196f3;
+}
+
+.upload-zone.dragover {
+    background: #e8f5e8;
+    border-color: #4caf50;
+}
+
+.upload-icon {
+    font-size: 48px;
+    margin-bottom: 10px;
+}
+
+.upload-text {
+    color: #666;
+    line-height: 1.5;
+}
+
+.upload-text strong {
+    color: #333;
+    font-size: 16px;
+}
+
+.upload-text small {
+    color: #999;
+    font-size: 14px;
+}
+
+.upload-status {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.upload-status.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.upload-status.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Progress bar */
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background: #f0f0f0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 15px 0;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3498db, #2ecc71);
+    transition: width 0.3s ease;
+    border-radius: 10px;
+    position: relative;
+}
+
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, 
+        transparent 35%, 
+        rgba(255,255,255,0.3) 35%, 
+        rgba(255,255,255,0.3) 65%, 
+        transparent 65%);
+    background-size: 20px 20px;
+    animation: progress-stripes 1s linear infinite;
+}
+
+@keyframes progress-stripes {
+    0% { background-position: 0 0; }
+    100% { background-position: 20px 0; }
+}
+
+.progress-text {
+    text-align: center;
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+/* Transcript actions */
+.transcript-actions {
+    margin: 15px 0;
+    text-align: center;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.cancel-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+.cancel-btn:hover {
+    background: #c0392b;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    h1 {
+        font-size: 1.8em;
+    }
+    
+    .tab-content {
+        padding: 20px;
+    }
+    
+    .controls {
+        flex-direction: column;
+    }
+    
+    button {
+        width: 100%;
+    }
+}

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSM Test Interface - STT & TTS</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Delayed Streams Modeling Test Interface</h1>
+        
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('tts')">Text-to-Speech</button>
+            <button class="tab-button" onclick="showTab('stt')">Speech-to-Text</button>
+        </div>
+
+        <!-- TTS Tab -->
+        <div id="tts-tab" class="tab-content active">
+            <h2>Text-to-Speech Testing</h2>
+            <div class="input-section">
+                <label for="tts-input">Enter text to convert to speech:</label>
+                <textarea id="tts-input" rows="5" placeholder="Type or paste your text here..."></textarea>
+                
+                <div class="quick-tests">
+                    <label>Quick test texts:</label>
+                    <select id="test-file-selector" onchange="loadTestFile()">
+                        <option value="">Select a test file...</option>
+                        <option value="test1_greeting.txt">Greeting (English)</option>
+                        <option value="test2_story.txt">Story (English)</option>
+                        <option value="test3_french.txt">French Text</option>
+                        <option value="test4_technical.txt">Technical</option>
+                        <option value="test5_numbers.txt">Numbers & Stats</option>
+                        <option value="test6_questions.txt">Questions</option>
+                        <option value="test7_poetry.txt">Poetry</option>
+                        <option value="test8_mixed_lang.txt">Mixed Languages</option>
+                        <option value="test9_instructions.txt">Instructions</option>
+                        <option value="test10_dialogue.txt">Dialogue</option>
+                    </select>
+                </div>
+
+                <div class="controls">
+                    <button onclick="runTTS()" class="primary-btn">Generate Speech</button>
+                    <button onclick="clearTTS()" class="secondary-btn">Clear</button>
+                </div>
+
+                <div class="output-section">
+                    <h3>Output:</h3>
+                    <audio id="tts-audio" controls style="display: none;"></audio>
+                    <pre id="tts-command"></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- STT Tab -->
+        <div id="stt-tab" class="tab-content">
+            <h2>Speech-to-Text Testing</h2>
+            <div class="input-section">
+                <div class="audio-source-tabs">
+                    <button class="source-tab active" onclick="switchAudioSource('file')">Use File</button>
+                    <button class="source-tab" onclick="switchAudioSource('upload')">Upload MP3</button>
+                    <button class="source-tab" onclick="switchAudioSource('record')">Record Audio</button>
+                </div>
+
+                <!-- File selection -->
+                <div id="file-source" class="audio-source active">
+                    <label>Select audio file:</label>
+                    <select id="audio-file-selector">
+                        <option value="audio/bria.mp3">bria.mp3</option>
+                        <option value="audio/loona.mp3">loona.mp3</option>
+                        <option value="audio/sample_fr_hibiki_crepes.mp3">sample_fr_hibiki_crepes.mp3</option>
+                    </select>
+                </div>
+
+                <!-- Upload MP3 interface -->
+                <div id="upload-source" class="audio-source">
+                    <div class="upload-area">
+                        <input type="file" id="mp3-file-input" accept="audio/mp3,audio/mpeg,audio/wav,audio/ogg" style="display: none;" onchange="handleFileUpload(event)">
+                        <div class="upload-zone" onclick="document.getElementById('mp3-file-input').click()">
+                            <div class="upload-icon">📁</div>
+                            <div class="upload-text">
+                                <strong>Click to select an audio file</strong><br>
+                                <small>Supports MP3, WAV, OGG formats<br>
+                                Max size: 500MB, Files >5min auto-segmented</small>
+                            </div>
+                        </div>
+                        <div id="upload-status" class="upload-status"></div>
+                        <audio id="uploaded-audio" controls style="display: none; width: 100%; margin-top: 10px;"></audio>
+                    </div>
+                </div>
+
+                <!-- Recording interface -->
+                <div id="record-source" class="audio-source">
+                    <div class="recording-controls">
+                        <button id="record-btn" onclick="toggleRecording()" class="record-button">
+                            <span class="record-icon">🎤</span> Start Recording
+                        </button>
+                        <div id="recording-status" class="recording-status"></div>
+                    </div>
+                    <audio id="recorded-audio" controls style="display: none; width: 100%; margin-top: 10px;"></audio>
+                    <div id="recording-timer" class="timer" style="display: none;">00:00</div>
+                </div>
+
+                <div class="model-selection">
+                    <label>Model:</label>
+                    <select id="stt-model">
+                        <option value="kyutai/stt-2.6b-en">English (2.6B)</option>
+                        <option value="kyutai/stt-1b-en_fr">English + French (1B)</option>
+                    </select>
+                </div>
+
+                <div class="controls">
+                    <button onclick="runSTT()" class="primary-btn">Transcribe Audio</button>
+                    <button onclick="clearSTT()" class="secondary-btn">Clear</button>
+                </div>
+
+                <div class="output-section">
+                    <h3>Transcription:</h3>
+                    <div id="progress-container" style="display: none;">
+                        <div class="progress-bar">
+                            <div id="progress-fill" class="progress-fill"></div>
+                        </div>
+                        <div id="progress-text" class="progress-text">Processing...</div>
+                        <button onclick="cancelTranscription()" class="cancel-btn" style="margin-top: 10px;">❌ Cancel Transcription</button>
+                    </div>
+                    <div id="stt-output" class="transcript"></div>
+                    <div class="transcript-actions" style="display: none;">
+                        <button onclick="downloadTranscription()" class="secondary-btn">📄 Download Transcription</button>
+                        <button onclick="copyTranscription()" class="secondary-btn">📋 Copy to Clipboard</button>
+                    </div>
+                    <pre id="stt-command"></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <h3>System Requirements</h3>
+            <ul>
+                <li>Python with moshi package installed</li>
+                <li>CUDA-capable GPU (or use --device cpu)</li>
+                <li>For Rust server: cargo and moshi-server installed</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

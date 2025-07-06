@@ -71,7 +71,20 @@ def tokens_to_timestamped_text(
         nonlocal text_tokens
         nonlocal sequence_timestamps
 
-        text = _decode(text_tokens[start:end])
+        try:
+            # Ensure start and end are proper integers
+            start_idx = int(start) if hasattr(start, 'item') else int(start)
+            end_idx = int(end) if hasattr(end, 'item') else int(end)
+            
+            # Validate indices
+            if start_idx < 0 or end_idx < 0 or start_idx >= len(text_tokens) or end_idx > len(text_tokens):
+                print(f"Warning: Invalid segment indices {start_idx}:{end_idx} for tensor of length {len(text_tokens)}")
+                return
+                
+            text = _decode(text_tokens[start_idx:end_idx])
+        except (TypeError, ValueError, IndexError) as e:
+            print(f"Warning: Failed to decode segment {start}:{end} - {e}")
+            return
         words_inside_segment = text.split()
 
         if len(words_inside_segment) == 0:
@@ -79,24 +92,25 @@ def tokens_to_timestamped_text(
         if len(words_inside_segment) == 1:
             # Single word within the boundaries, the general case
             sequence_timestamps.append(
-                TimestampedText(text=text, timestamp=_tstmp(start, end))
+                TimestampedText(text=text, timestamp=_tstmp(start_idx, end_idx))
             )
         else:
             # We're in a rare situation where multiple words are so close they are not separated by `end_of_padding`.
             # We tokenize words one-by-one; each word is assigned with as many frames as much tokens it has.
+            current_start = start_idx
             for adjacent_word in words_inside_segment[:-1]:
                 n_tokens = len(tokenizer.encode(adjacent_word))
                 sequence_timestamps.append(
                     TimestampedText(
-                        text=adjacent_word, timestamp=_tstmp(start, start + n_tokens)
+                        text=adjacent_word, timestamp=_tstmp(current_start, current_start + n_tokens)
                     )
                 )
-                start += n_tokens
+                current_start += n_tokens
 
             # The last word takes everything until the boundary
             adjacent_word = words_inside_segment[-1]
             sequence_timestamps.append(
-                TimestampedText(text=adjacent_word, timestamp=_tstmp(start, end))
+                TimestampedText(text=adjacent_word, timestamp=_tstmp(current_start, end_idx))
             )
 
     (segment_boundaries,) = torch.where(text_tokens == end_of_padding_id)
@@ -105,24 +119,39 @@ def tokens_to_timestamped_text(
         return []
 
     for i in range(len(segment_boundaries) - 1):
-        segment_start = int(segment_boundaries[i]) + 1
-        segment_end = int(segment_boundaries[i + 1])
+        try:
+            segment_start = int(segment_boundaries[i].item()) + 1
+            segment_end = int(segment_boundaries[i + 1].item())
+            _decode_segment(segment_start, segment_end)
+        except (TypeError, ValueError, AttributeError) as e:
+            print(f"Warning: Failed to process segment boundary {i} - {e}")
+            continue
 
-        _decode_segment(segment_start, segment_end)
+    try:
+        last_segment_start = int(segment_boundaries[-1].item()) + 1
 
-    last_segment_start = segment_boundaries[-1] + 1
+        boundary_token = torch.tensor([tokenizer.eos_id()])
+        (end_of_last_segment,) = torch.where(
+            torch.isin(text_tokens[last_segment_start:], boundary_token)
+        )
 
-    boundary_token = torch.tensor([tokenizer.eos_id()])
-    (end_of_last_segment,) = torch.where(
-        torch.isin(text_tokens[last_segment_start:], boundary_token)
-    )
-
-    if not end_of_last_segment.numel():
-        # upper-bound either end of the audio or 1 second duration, whicher is smaller
-        last_segment_end = min(text_tokens.shape[-1], last_segment_start + frame_rate)
-    else:
-        last_segment_end = last_segment_start + end_of_last_segment[0]
-    _decode_segment(last_segment_start, last_segment_end)
+        if not end_of_last_segment.numel():
+            # upper-bound either end of the audio or 1 second duration, whicher is smaller
+            last_segment_end = min(text_tokens.shape[-1], last_segment_start + frame_rate)
+        else:
+            last_segment_end = last_segment_start + int(end_of_last_segment[0].item())
+        _decode_segment(last_segment_start, last_segment_end)
+    except (TypeError, ValueError, AttributeError, IndexError) as e:
+        print(f"Warning: Failed to process last segment - {e}")
+        # Try to decode whatever we can from the remaining tokens
+        try:
+            if len(segment_boundaries) > 0:
+                fallback_start = int(segment_boundaries[-1].item()) + 1
+                fallback_end = min(text_tokens.shape[-1], fallback_start + 100)  # Process at most 100 tokens
+                if fallback_start < fallback_end:
+                    _decode_segment(fallback_start, fallback_end)
+        except Exception:
+            pass  # Give up gracefully
 
     return sequence_timestamps
 
@@ -179,13 +208,17 @@ def main(args):
                 text_tokens_accum.append(text_tokens)
 
     utterance_tokens = torch.concat(text_tokens_accum, dim=-1)
+    # Add the segment offset to the calculated offset
+    calculated_offset = int(n_prefix_chunks / mimi.frame_rate) + audio_delay_seconds
+    total_offset = calculated_offset + args.offset_seconds
+    
     timed_text = tokens_to_timestamped_text(
         utterance_tokens,
         tokenizer,
         mimi.frame_rate,
         end_of_padding_id=0,
         padding_token_id=padding_token_id,
-        offset_seconds=int(n_prefix_chunks / mimi.frame_rate) + audio_delay_seconds,
+        offset_seconds=total_offset,
     )
 
     decoded = " ".join([str(t) for t in timed_text])
@@ -214,6 +247,12 @@ if __name__ == "__main__":
         type=str,
         default="cuda",
         help="Device on which to run, defaults to 'cuda'.",
+    )
+    parser.add_argument(
+        "--offset-seconds",
+        type=float,
+        default=0.0,
+        help="Time offset in seconds to add to all timestamps (for segmented audio).",
     )
     args = parser.parse_args()
 

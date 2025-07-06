@@ -1,0 +1,1 @@
+The delayed streams modeling technique enables real-time speech-to-text conversion with impressive accuracy. By processing audio in chunks of 500 milliseconds, the system achieves a balance between latency and recognition quality.
